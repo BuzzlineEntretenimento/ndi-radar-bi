@@ -141,6 +141,7 @@
 .follower-intro{color:var(--mute);font-size:13px;margin:7px 0 12px}
 @media(max-width:620px){.follower-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.follower-history{overflow-x:auto}}
 
+.follower-chart-wrap{margin:16px 0 22px;padding:15px;border:1px solid var(--line);border-radius:12px;background:var(--wash)}.follower-chart{display:block;width:100%;height:auto;color:var(--ink)}.follower-chart-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.follower-chart-meta small{display:block;color:var(--mute);font-size:11px}.follower-chart-meta strong{display:block;font-size:17px}.follower-chart-meta .positive{color:var(--good)}.follower-chart-meta .negative{color:#b84248}.follower-chart-note{display:block;color:var(--mute);font-size:11px}@media(max-width:550px){.follower-chart-meta{gap:7px}.follower-chart-meta strong{font-size:13px}}
 </style></head>
 <body>
 <div class="wrap"><header class="top"><div class="brand"><div class="brand-mark" role="img" aria-label="Logotipo da Núcleo da Ideia"></div><div class="brand-text"><b>Inteligência de mercado</b><span>Comunicação × Comercial</span></div></div><div class="meta"><div><strong>13 OUTUBRO 2026</strong><small>Fotografia inicial · @buzz.304</small></div><button id="themeButton" class="theme" type="button" aria-label="Alternar tema claro e escuro">◐ &nbsp; Tema</button></div></header></div>
@@ -222,10 +223,25 @@ function trendHtml(a){
  const percent=c.percent===null?'—':(c.percent>0?'+':'')+c.percent.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
  return `<span class="follower-pill ${cls}" title="${ptDate(c.previous.date)} → ${ptDate(c.last.date)}">${icon} ${trendSign(c.delta)}${formatInt(Math.abs(c.delta))} (${percent})</span>`;
 }
+function followerChart(a){
+ const hist=followerSeries(a);if(hist.length<2)return '<p class="follower-intro">O gráfico aparecerá após a segunda coleta datada.</p>';
+ const vals=hist.map(p=>p.followers),low=Math.min(...vals),high=Math.max(...vals),mn=high===low?Math.max(0,low-1):low,mx=high===low?high+1:high;
+ const w=600,h=215,L=55,R=20,T=30,B=40,CW=w-L-R,CH=h-T-B;
+ const xx=i=>L+i*CW/(hist.length-1),yy=v=>T+(mx-v)*CH/(mx-mn);
+ const points=hist.map((p,i)=>xx(i).toFixed(1)+','+yy(p.followers).toFixed(1)).join(' ');
+ const first=hist[0],last=hist[hist.length-1],delta=last.followers-first.followers;
+ const totalPercent=first.followers>0?delta/first.followers*100:null;
+ const textPct=totalPercent===null?'':(totalPercent>0?'+':'')+totalPercent.toLocaleString('pt-BR',{maximumFractionDigits:2})+'%';
+ return `<div class="follower-chart-wrap"><div class="follower-chart-meta"><div><small>Primeira coleta</small><strong>${formatInt(first.followers)}</strong></div><div><small>Última coleta</small><strong>${formatInt(last.followers)}</strong></div><div><small>Variação acumulada</small><strong class="${delta>0?'positive':delta<0?'negative':''}">${trendSign(delta)}${formatInt(Math.abs(delta))} ${textPct?'('+textPct+')':''}</strong></div></div><svg class="follower-chart" role="img" aria-label="Evolução de seguidores de ${en(a.handle)} de ${ptDate(first.date)} a ${ptDate(last.date)}" viewBox="0 0 ${w} ${h}">
+ ${[0,.5,1].map(t=>`<g><line x1="${L}" x2="${w-R}" y1="${T+t*CH}" y2="${T+t*CH}" stroke="currentColor" opacity=".13" stroke-dasharray="4 4"/><text x="${L-7}" y="${T+t*CH+4}" text-anchor="end" font-size="12" fill="currentColor" opacity=".7">${formatInt(mx-t*(mx-mn))}</text></g>`).join('')}
+ <polyline fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="${points}"/>
+ ${hist.map((p,i)=>`<circle cx="${xx(i)}" cy="${yy(p.followers)}" r="5" fill="var(--accent)" stroke="var(--paper)" stroke-width="2"><title>${ptDate(p.date)}: ${formatInt(p.followers)} seguidores</title></circle>`).join('')}
+ <text x="${L}" y="${h-9}" font-size="12" fill="currentColor" opacity=".75">${ptDate(first.date)}</text><text x="${w-R}" y="${h-9}" font-size="12" fill="currentColor" opacity=".75" text-anchor="end">${ptDate(last.date)}</text></svg><small class="follower-chart-note">Cada ponto representa uma coleta. O espaçamento horizontal segue a sequência das medições, não o intervalo real de dias.</small></div>`;
+}
 function followerHistoryHtml(a){
  const hist=followerSeries(a),c=followerChange(a);
  const intro=c?`<p class="follower-intro">Coletas comparadas: ${ptDate(c.previous.date)} → ${ptDate(c.last.date)} · ${trendHtml(a)}</p>`:'<p class="follower-intro">Esta é a linha de base. Atualize o número de seguidores e a data da coleta para começar a comparação semanal.</p>';
- return `<section class="dsection follower-history"><h3>Evolução de seguidores</h3>${intro}<table aria-label="Histórico de ${en(a.handle)}"><thead><tr><th>Data</th><th>Seguidores</th><th>Variação</th></tr></thead><tbody>${hist.map((p,i)=>{const last=hist[i-1],d=last?p.followers-last.followers:null;return `<tr><td>${ptDate(p.date)}</td><td>${formatInt(p.followers)}</td><td>${d===null?'Base inicial':`${trendSign(d)}${formatInt(Math.abs(d))}`}</td></tr>`}).join('')}</tbody></table><p class="follower-intro">O histórico fica salvo neste navegador e no backup JSON. Os valores iniciais podem ter sido arredondados pelo Instagram.</p></section>`;
+ return `<section class="dsection follower-history"><h3>Evolução de seguidores</h3>${intro}${followerChart(a)}<table aria-label="Histórico de ${en(a.handle)}"><thead><tr><th>Data</th><th>Seguidores</th><th>Variação</th></tr></thead><tbody>${hist.map((p,i)=>{const last=hist[i-1],d=last?p.followers-last.followers:null;return `<tr><td>${ptDate(p.date)}</td><td>${formatInt(p.followers)}</td><td>${d===null?'Base inicial':`${trendSign(d)}${formatInt(Math.abs(d))}`}</td></tr>`}).join('')}</tbody></table><p class="follower-intro">O histórico fica salvo neste navegador e no backup JSON. Os valores iniciais podem ter sido arredondados pelo Instagram.</p></section>`;
 }
 function renderFollowerSummary(){
  const data=accounts.map(a=>({a,c:followerChange(a)})).filter(x=>x.c);
