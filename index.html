@@ -221,6 +221,24 @@ footer{border-top:1px solid var(--line)}
 @media(max-width:640px){.top{padding:12px 0 15px;gap:10px;min-height:75px}.brand{gap:9px}.brand-mark{width:70px;height:50px;flex-basis:70px}.brand-text{padding:6px 0 6px 11px}.brand-text b{font-size:17px}.brand-text span{font-size:9.5px;margin-top:3px;max-width:130px}.meta{gap:7px}.theme{font-size:11px;padding:7px 9px;white-space:nowrap}.nav{gap:20px}.nav a{font-size:11px}.hero{padding:47px 0 49px}.hero h1{font-size:clamp(43px,11vw,66px)}.hero .intro{font-size:14.5px;margin-top:22px}.hero-aside{padding-left:16px}.section-no{font-size:10px}.profile-card-body{padding:15px 12px}.footer-signature .brand-mark{width:40px;height:34px;flex-basis:40px}}
 @media(prefers-reduced-motion:reduce){.profile-card,.brand-mark,.nav a{transition:none!important}}
 
+
+/* NDI-CORNER-DETAILS-20261019 · Marca NDI em cantos discretos */
+.hero,footer{position:relative;isolation:isolate;overflow:hidden}
+.hero::after,footer::before{
+  content:"";position:absolute;display:block;
+  background-image:url("./ndi-elemento-laranja.svg");
+  background-repeat:no-repeat;background-position:center;background-size:contain;
+  pointer-events:none;z-index:0;
+}
+.hero::after{width:154px;height:173px;top:12px;right:-29px;opacity:.56;transform:rotate(4deg)}
+footer::before{width:126px;height:142px;bottom:-49px;left:-36px;opacity:.46;transform:rotate(180deg)}
+.hero>*,footer>*{position:relative;z-index:1}
+@media(max-width:640px){
+  .hero::after{width:99px;height:112px;top:14px;right:-26px;opacity:.50}
+  footer::before{width:88px;height:99px;bottom:-37px;left:-30px;opacity:.44}
+}
+@media print{.hero::after,footer::before{display:none!important}}
+
 </style>
 </head>
 <body>
