@@ -305,6 +305,7 @@ try{
  }
 }catch(e){}
 
+const $=id=>document.getElementById(id);
 const CLOUD_URL='https://nrafcfuzweqwqdjhzfhc.supabase.co';
 const CLOUD_KEY='sb_publishable_AZhkt0B8QvSOSejDYA-niA_XcHC0yT3';
 const cloud=window.supabase?.createClient(CLOUD_URL,CLOUD_KEY,{auth:{detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
@@ -385,7 +386,7 @@ if(cloud){
  cloudAuthRefresh();cloudLoad();
 }else cloudStatus('Banco temporariamente indisponível');
 
-const $=id=>document.getElementById(id);const totalCapturas=START.filter(a=>Boolean(a.profileCaptureData)).length;const formatInt=x=>typeof x==='number'&&Number.isFinite(x)?Math.round(x).toLocaleString('pt-BR'):'—';const formatK=x=> x>=1000000?(x/1000000).toLocaleString('pt-BR',{maximumFractionDigits:2})+' mi':x>=1000?(x/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' mil':formatInt(x);const escapeHTML=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));const en=s=>escapeHTML(s);const pct=n=>typeof n==='number'&&Number.isFinite(n)?n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—';const hasMetric=a=>typeof a.followers==='number'&&a.followers>0;const er=a=>typeof a.avgLikes==='number'&&typeof a.avgComments==='number'&&hasMetric(a)?(a.avgLikes+a.avgComments)/a.followers*100:typeof a.er==='number'?a.er:typeof a.erReported==='number'?a.erReported:null;
+const totalCapturas=START.filter(a=>Boolean(a.profileCaptureData)).length;const formatInt=x=>typeof x==='number'&&Number.isFinite(x)?Math.round(x).toLocaleString('pt-BR'):'—';const formatK=x=> x>=1000000?(x/1000000).toLocaleString('pt-BR',{maximumFractionDigits:2})+' mi':x>=1000?(x/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' mil':formatInt(x);const escapeHTML=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));const en=s=>escapeHTML(s);const pct=n=>typeof n==='number'&&Number.isFinite(n)?n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—';const hasMetric=a=>typeof a.followers==='number'&&a.followers>0;const er=a=>typeof a.avgLikes==='number'&&typeof a.avgComments==='number'&&hasMetric(a)?(a.avgLikes+a.avgComments)/a.followers*100:typeof a.er==='number'?a.er:typeof a.erReported==='number'?a.erReported:null;
 
 function validDate(raw){
  const v=String(raw??'').trim(),pt=v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/),iso=v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
