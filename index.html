@@ -506,12 +506,15 @@ function renderPerformanceProfile(){
  if(!a){el.innerHTML='<p class="sub">Selecione um perfil para conferir as coletas.</p>';return;}
  const rows=performanceHistory.filter(x=>x.profile_id===id).sort((x,y)=>x.observed_on.localeCompare(y.observed_on));
  const columns=[['Seguidores','followers'],['Publicações','total_posts'],['Curtidas médias','avg_likes'],['Comentários médios','avg_comments'],['Visualizações médias','avg_views'],['Posts/semana','weekly_posts']];
+ const engagementRate=r=>r&&typeof r.avg_likes==='number'&&typeof r.avg_comments==='number'&&typeof r.followers==='number'&&r.followers>0?(r.avg_likes+r.avg_comments)/r.followers*100:null;
  const latest=rows.at(-1),previous=rows.at(-2);
+ const erLast=engagementRate(latest),erPrev=engagementRate(previous);
+ const engagementCard='<div class="follower-stat"><span>Interações médias / seguidores*</span><b>'+(erLast===null?'—':pct(erLast))+'</b><small>'+(erLast!==null&&erPrev!==null?(erLast-erPrev>=0?'+':'')+(erLast-erPrev).toLocaleString('pt-BR',{maximumFractionDigits:2})+' p.p. desde a coleta anterior':'Sem amostras comparáveis')+'</small></div>';
  const cards=columns.map(([label,key])=>{
   const v=latest?.[key],p=previous?.[key];const has=typeof v==='number'&&typeof p==='number';const d=has?v-p:null;
   return '<div class="follower-stat"><span>'+en(label)+'</span><b>'+formatInt(v)+'</b><small>'+(d===null?'Sem comparação equivalente':(d>0?'+':'')+formatInt(d)+' desde '+ptDate(previous.observed_on))+'</small></div>';
- }).join('');
- el.innerHTML='<p class="sub">'+en(a.handle)+' · '+rows.length+' coletas registradas; comparações apenas entre valores disponíveis.</p><div class="follower-stats" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">'+cards+'</div><div style="overflow-x:auto;margin-top:16px"><table><thead><tr><th>Data</th>'+columns.map(x=>'<th>'+en(x[0])+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+ptDate(r.observed_on)+'</td>'+columns.map(x=>'<td>'+formatInt(r[x[1]])+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><p class="smallprint">Médias devem usar amostras e períodos comparáveis. Visualizações ausentes não são zero.</p>';
+ }).join('')+engagementCard;
+ el.innerHTML='<p class="sub">'+en(a.handle)+' · '+rows.length+' coletas registradas; comparações apenas entre valores disponíveis.</p><div class="follower-stats" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">'+cards+'</div><div style="overflow-x:auto;margin-top:16px"><table><thead><tr><th>Data</th>'+columns.map(x=>'<th>'+en(x[0])+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+ptDate(r.observed_on)+'</td>'+columns.map(x=>'<td>'+formatInt(r[x[1]])+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><p class="smallprint">Médias devem usar amostras e períodos comparáveis. Visualizações ausentes não são zero. *Interações médias ÷ seguidores é um indicador público estimado, não engajamento por alcance.</p>';
 }
 function renderNdiInsights(){
  const el=$('ndiInsightCards');if(!el)return;
