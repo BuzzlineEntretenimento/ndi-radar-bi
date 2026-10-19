@@ -222,26 +222,37 @@ footer{border-top:1px solid var(--line)}
 @media(prefers-reduced-motion:reduce){.profile-card,.brand-mark,.nav a{transition:none!important}}
 
 
-/* NDI-CORNER-DETAILS-20261019 · Marca NDI em cantos discretos */
-.hero,footer{position:relative;isolation:isolate;overflow:hidden}
-.hero::after,footer::before{
-  content:"";position:absolute;display:block;
-  background-image:url("./ndi-elemento-laranja.svg");
-  background-repeat:no-repeat;background-position:center;background-size:contain;
-  pointer-events:none;z-index:0;
+/* NDI-SIDE-RAIL-20261019 · ornamento acompanha a rolagem, fora da área de proteção do logo e do conteúdo */
+.ndi-side-ornament{display:none;pointer-events:none}
+@media (min-width:1280px){
+  /* Reserva uma margem exclusiva: o traço nunca passa por cima de textos, cartões nem logos. */
+  .wrap{padding-right:calc(clamp(18px,4vw,40px) + 185px)}
+  .ndi-side-ornament{
+    display:block;
+    position:fixed;top:51%;right:0;transform:translateY(-50%);
+    width:184px;height:430px;overflow:hidden;
+    pointer-events:none;z-index:1;
+  }
+  .ndi-side-ornament::before{
+    content:"";display:block;position:absolute;top:42px;right:-108px;
+    width:315px;height:355px;
+    background:url("./ndi-elemento-laranja.svg") center/contain no-repeat;
+    opacity:.79;
+    transform:rotate(-9deg);
+  }
 }
-.hero::after{width:154px;height:173px;top:12px;right:-29px;opacity:.56;transform:rotate(4deg)}
-footer::before{width:126px;height:142px;bottom:-49px;left:-36px;opacity:.46;transform:rotate(180deg)}
-.hero>*,footer>*{position:relative;z-index:1}
-@media(max-width:640px){
-  .hero::after{width:99px;height:112px;top:14px;right:-26px;opacity:.50}
-  footer::before{width:88px;height:99px;bottom:-37px;left:-30px;opacity:.44}
+@media (min-width:1700px){
+  /* O espaço natural de uma tela larga já protege o layout. */
+  .wrap{padding-right:clamp(18px,4vw,40px)}
+  .ndi-side-ornament{right:max(0px,calc((100vw - 1660px)/2 - 48px));width:195px}
 }
-@media print{.hero::after,footer::before{display:none!important}}
+@media (max-width:1279px){.ndi-side-ornament{display:none!important}}
+@media print{.ndi-side-ornament{display:none!important}}
 
 </style>
 </head>
 <body>
+<div class="ndi-side-ornament" aria-hidden="true"></div>
 <div class="wrap"><header class="top"><div class="brand"><div class="brand-mark" role="img" aria-label="Logotipo oficial da Núcleo da Ideia"></div><div class="brand-text"><b>Radar BI</b><span>Marketing · concorrência · inteligência de mercado</span></div></div><div class="meta"><div><strong>13 OUTUBRO 2026</strong><small>Fotografia inicial · @buzz.304</small></div><button id="themeButton" class="theme" type="button" aria-label="Alternar tema claro e escuro">◐ &nbsp; Tema</button></div></header></div>
 <div class="nav-stick"><nav class="nav wrap" aria-label="Navegação do relatório"><a href="#panorama">Panorama</a><a href="#segmentos">Nichos</a><a href="#estrategia">Leituras estratégicas</a><a href="#indicadores">Indicadores</a><a href="#prioridades">Prioridades</a><a href="#clientes">Clientes das agências</a><a href="#diretorio">90 perfis</a><a href="#metodo">Metodologia</a></nav></div>
 <main class="wrap"><div class="hero"><div><p class="eyebrow">Radar NDI / Marketing / Inteligência competitiva</p><h1>Radar de mercado.<br><em>Olhar para fora,</em> agir melhor.</h1><p class="intro">Um olhar sobre agências, referências criativas, clientes e tendências para apoiar decisões de comunicação e marketing da Núcleo da Ideia. Os 90 perfis continuam disponíveis para investigação e benchmarking.</p></div><aside class="hero-aside"><div><div class="stage">Base inicial do estudo</div><p>90 perfis acompanhados pela conta de observação <strong>@buzz.304</strong>.</p></div><div><div class="aside-date">Triagem • 13.10.2026</div><p>Os temas abaixo representam <b>hipóteses de investigação</b>, não tendências já comprovadas nos feeds.</p></div></aside></div>
