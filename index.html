@@ -252,7 +252,7 @@ footer{border-top:1px solid var(--line)}
 </div>
 <div class="grid2" style="margin-top:20px"><div class="card"><h3>NDI como linha de base interna</h3><p class="sub">Dados históricos do dashboard interno 2022–2026; não confundir com a captura de 13/10/2026, que mostra 3.214 seguidores e 335 posts</p><div class="ref-snapshot"><strong>3.212</strong><p>Seguidores na referência de outubro de 2026<span class="tiny">Dado interno do relatório, separado das estimativas externas.</span></p></div><div class="stages"><div class="stage-line"><span>Visualizações no período do relatório</span><b>488.335</b></div><div class="stage-line"><span>Interações totais no relatório</span><b>14.218</b></div><div class="stage-line"><span>Publicações contabilizadas</span><b>296</b></div></div><p class="smallprint">Os indicadores internos abrangem períodos próprios. Não devem ser convertidos diretamente em taxa de engajamento comparativa com as contas externas.</p></div><div class="card"><h3>Leitura de qualidade da base</h3><p class="sub">O que cada status significa</p><div class="mnotes"><div class="line"><span><span class="tag blue">Capturas recebidas</span> Dados do cabeçalho</span><b id="captureStat">90 contas</b></div><div class="line"><span><span class="tag warn">Captura pendente</span> Ainda não consultadas</span><b id="noDataStat">0</b></div><div class="line"><span><span class="tag good">Manual</span> Dependente de publicações individuais</span><b id="manualStat">0</b></div></div><p class="smallprint">As fichas de perfis permitem registrar métricas no banco compartilhado mediante login autorizado.</p></div></div></section>
 <section id="performance"><div class="sect-head"><div><span class="section-no">05 / DESEMPENHO</span><h2>Além dos seguidores.</h2><p class="lead">Histórico datado das coletas públicas: publicações, interações e visualizações. Compare a evolução por perfil, sem confundir métricas de amostras diferentes.</p></div></div>
-<div class="grid2"><div class="card"><h3>Cobertura dos dados de performance</h3><p class="sub">Quantos perfis têm cada indicador informado</p><div id="performanceCoverage" class="mnotes"></div></div><div class="card"><h3>Evolução da base</h3><p class="sub">Atualizações registradas com data no banco compartilhado</p><div id="performanceSummary" class="mnotes"></div></div></div>
+<div class="card" style="margin-bottom:20px"><h3>Coleta consolidada · 19/09 a 19/10/2026</h3><p class="sub">14 perfis de alta prioridade · indicadores por publicação e por Reel · dados fornecidos pela NDI</p><div id="periodReport"></div></div><div class="grid2"><div class="card"><h3>Cobertura dos dados de performance</h3><p class="sub">Quantos perfis têm cada indicador informado</p><div id="performanceCoverage" class="mnotes"></div></div><div class="card"><h3>Evolução da base</h3><p class="sub">Atualizações registradas com data no banco compartilhado</p><div id="performanceSummary" class="mnotes"></div></div></div>
 <div class="card" style="margin-top:20px"><div class="ranking-chooser"><label for="performanceProfile">Evolução por perfil</label><select id="performanceProfile" aria-label="Perfil para comparar métricas de performance"><option value="">Selecione um perfil</option></select></div><div id="performanceDetail"><p class="sub">Selecione um perfil para conferir as coletas históricas e a variação dos números.</p></div></div>
 </section>
 <section id="insights-ndi"><div class="sect-head"><div><span class="section-no">06 / INTELIGÊNCIA NDI</span><h2>O que os dados nos dizem?</h2><p class="lead">Leituras automáticas a partir de coletas verificadas, com ressalvas quando faltam dados. Oportunidades para a NDI, não conclusões sobre campanhas sem evidência.</p></div></div><div id="ndiInsightCards" class="grid2"></div><p class="smallprint">Atualização ao carregar os dados do Supabase. Crescimento de seguidores não prova sucesso comercial. Interações públicas não equivalem a alcance ou taxa de engajamento por alcance. Insumos qualitativos e novos cases precisam de validação editorial.</p></section>
@@ -314,7 +314,7 @@ const $=id=>document.getElementById(id);
 const CLOUD_URL='https://nrafcfuzweqwqdjhzfhc.supabase.co';
 const CLOUD_KEY='sb_publishable_AZhkt0B8QvSOSejDYA-niA_XcHC0yT3';
 const cloud=window.supabase?.createClient(CLOUD_URL,CLOUD_KEY,{auth:{detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
-let cloudReady=false,cloudEditor=false,cloudUser=null;let performanceHistory=[];
+let cloudReady=false,cloudEditor=false,cloudUser=null;let performanceHistory=[];let periodPerformance=[];
 function cloudStatus(message){const el=document.getElementById('ndiCloudStatus');if(el)el.textContent=message;}
 function cloudMetrics(a){return {
  profile_id:a.id,followers:a.followers,following:a.following,total_posts:a.totalPosts,
@@ -327,12 +327,13 @@ function cloudMetrics(a){return {
 async function cloudLoad(){
  if(!cloud){cloudStatus('Conexão indisponível. Recarregue a página.');return;}
  try{
-  const [prof,met,hist]=await Promise.all([
+  const [prof,met,hist,periods]=await Promise.all([
    cloud.from('ndi_bi_profiles').select('id,monitoring_group,niche,priority'),
    cloud.from('ndi_bi_metrics').select('*'),
-   cloud.from('ndi_bi_snapshots').select('profile_id,observed_on,followers,total_posts,following,avg_likes,avg_comments,avg_views,weekly_posts,sample_posts,format_reels,format_carousels,metric_source').order('observed_on',{ascending:true})
+   cloud.from('ndi_bi_snapshots').select('profile_id,observed_on,followers,total_posts,following,avg_likes,avg_comments,avg_views,weekly_posts,sample_posts,format_reels,format_carousels,metric_source').order('observed_on',{ascending:true}),
+   cloud.from('ndi_bi_period_performance').select('*').order('period_end',{ascending:false})
   ]);
-  for(const entry of [prof,met,hist])if(entry.error)throw entry.error;
+  for(const entry of [prof,met,hist,periods])if(entry.error)throw entry.error;
   if(prof.data.length!==START.length)throw Error('A base compartilhada está incompleta');
   const pMap=new Map(prof.data.map(x=>[x.id,x])),mMap=new Map(met.data.map(x=>[x.profile_id,x]));
   accounts=START.map(a=>{
@@ -350,7 +351,7 @@ async function cloudLoad(){
     followerHistory:hist.data.filter(h=>h.profile_id===a.id&&h.followers!=null).map(h=>({date:h.observed_on,followers:h.followers}))
    };
   });
-  performanceHistory=hist.data;cloudReady=true;cloudStatus('Banco compartilhado ativo · 90 perfis');$('lastSaved').textContent='dados compartilhados no Supabase';
+  performanceHistory=hist.data;periodPerformance=periods.data;cloudReady=true;cloudStatus('Banco compartilhado ativo · 90 perfis');$('lastSaved').textContent='dados compartilhados no Supabase';
   redraw();renderClients();renderPerformance();
  }catch(e){cloudReady=false;cloudStatus('Erro ao consultar banco compartilhado. Tente recarregar.');console.error('NDI Supabase:',e);}
 }
@@ -499,7 +500,7 @@ function renderPerformance(){
  const rich=performanceHistory.filter(x=>x.avg_likes!==null||x.avg_comments!==null||x.avg_views!==null);
  $('performanceSummary').innerHTML='<div class="line"><span>Perfis com histórico datado</span><b>'+measured.size+'</b></div><div class="line"><span>Coletas totais</span><b>'+performanceHistory.length+'</b></div><div class="line"><span>Coletas com desempenho de posts</span><b>'+rich.length+'</b></div><p class="sub">Cada nova coleta preserva as datas anteriores. Sem medições equivalentes, não calculamos variações artificiais.</p>';
  const select=$('performanceProfile'),selected=select.value;select.innerHTML='<option value="">Selecione um perfil</option>'+[...accounts].sort((a,b)=>a.handle.localeCompare(b.handle)).map(a=>'<option value="'+a.id+'">'+en(a.handle)+'</option>').join('');select.value=selected;
- renderPerformanceProfile();renderNdiInsights();
+ renderPerformanceProfile();renderPeriodSummary();renderNdiInsights();
 }
 function renderPerformanceProfile(){
  const id=Number($('performanceProfile')?.value),a=accounts.find(x=>x.id===id),el=$('performanceDetail');if(!el)return;
@@ -516,6 +517,15 @@ function renderPerformanceProfile(){
  }).join('')+engagementCard;
  el.innerHTML='<p class="sub">'+en(a.handle)+' · '+rows.length+' coletas registradas; comparações apenas entre valores disponíveis.</p><div class="follower-stats" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">'+cards+'</div><div style="overflow-x:auto;margin-top:16px"><table><thead><tr><th>Data</th>'+columns.map(x=>'<th>'+en(x[0])+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td>'+ptDate(r.observed_on)+'</td>'+columns.map(x=>'<td>'+formatInt(r[x[1]])+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><p class="smallprint">Médias devem usar amostras e períodos comparáveis. Visualizações ausentes não são zero. *Interações médias ÷ seguidores é um indicador público estimado, não engajamento por alcance.</p>';
 }
+
+function renderPeriodSummary(){
+ const container=$('periodReport');if(!container)return;
+ const current=periodPerformance.filter(x=>x.period_start==='2026-09-19'&&x.period_end==='2026-10-19');
+ if(!current.length){container.innerHTML='<p class="sub">Aguardando coletas consolidadas por período.</p>';return;}
+ const totals=current.reduce((o,r)=>{o.posts+=r.posts_count;o.reels+=r.reels_count;o.carousels+=r.carousels_count;o.others+=r.other_formats_count;o.likes+=r.likes_total||0;o.comments+=r.comments_total||0;o.views+=r.reel_views_total||0;return o;},{posts:0,reels:0,carousels:0,others:0,likes:0,comments:0,views:0});
+ const leaders=[...current].filter(x=>x.likes_total!==null).sort((a,b)=>b.likes_total/a.posts_count-a.likes_total/b.posts_count).slice(0,5);
+ container.innerHTML='<div class="follower-stats" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px">'+[['Perfis',current.length],['Publicações',totals.posts],['Reels',totals.reels],['Carrosséis',totals.carousels],['Outros formatos',totals.others],['Curtidas visíveis',totals.likes],['Comentários visíveis',totals.comments],['Visualizações Reels*',totals.views]].map(([k,v])=>'<div class="follower-stat"><b>'+formatInt(v)+'</b><span>'+en(k)+'</span></div>').join('')+'</div><h4 style="margin:20px 0 8px">Média de curtidas por postagem (amostras coletadas)</h4><div class="mnotes">'+leaders.map(p=>{const a=accounts.find(x=>x.id===p.profile_id);return '<div class="line"><span>'+en(a?.handle||String(p.profile_id))+' · '+p.posts_count+' posts</span><b>'+formatInt(p.likes_total/p.posts_count)+'</b></div>'}).join('')+'</div><p class="smallprint">*Inclui números aproximados onde indicado. A TM1 tem interações ocultas e não integra o ranking de curtidas. Os 14 perfis têm amostras de tamanhos diferentes; o ranking é apenas descritivo, não comprova maior eficácia. Médias de views consideram Reels, não todas as publicações. Não há dados individuais para cálculo de mediana.</p>';
+}
 function renderNdiInsights(){
  const el=$('ndiInsightCards');if(!el)return;
  const highs=accounts.filter(x=>x.priority==='Alta');
@@ -523,7 +533,10 @@ function renderNdiInsights(){
  const growing=movements.filter(x=>x.c.delta>0).sort((a,b)=>b.c.percent-a.c.percent);
  const sampled=accounts.filter(a=>typeof a.avgLikes==='number'&&typeof a.avgComments==='number'&&a.samplePosts>0);
  const content=sampled.length?'Há '+sampled.length+' perfis com amostras de interações. Compare as taxas apenas entre amostras de mesma janela e formato.':'Ainda não há uma amostra padronizada de curtidas e comentários. Próxima coleta sugerida: cinco publicações recentes de cada perfil de alta prioridade.';
+ const period=periodPerformance.filter(x=>x.period_start==='2026-09-19'&&x.period_end==='2026-10-19');
+ const totalPosts=period.reduce((s,x)=>s+x.posts_count,0);const reels=period.reduce((s,x)=>s+x.reels_count,0);const samples=period.filter(x=>x.likes_total!==null);
  const cards=[
+  ['Retrato editorial do período',period.length?period.length+' perfis pesquisados entre 19/09 e 19/10/2026, '+totalPosts+' posts no total ('+reels+' Reels).':'Aguardando a primeira coleta de publicações.','Os dados são agregados por perfil; médias não indicam uniformidade entre posts.'],
   ['Prioritários em observação',highs.length+' perfis prioritários, '+movements.length+' com pelo menos duas datas de seguidores.','Sugestão: mantenha a coleta semanal para preservar uma série histórica contínua.'],
   ['Movimentação da audiência',growing.length?'Maior alta percentual registrada: '+growing[0].a.handle+' ('+pct(growing[0].c.percent)+') entre '+ptDate(growing[0].c.previous.date)+' e '+ptDate(growing[0].c.last.date)+'.':'Ainda não há crescimento percentual positivo comprovado nas coletas prioritárias.','Variação de seguidores é sinal de audiência, não comprovação de eficácia de uma campanha.'],
   ['Oportunidade de leitura editorial',content,'Registre formato, data, curtidas, comentários, visualizações disponíveis e fonte para cada amostra.'],
