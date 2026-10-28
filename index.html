@@ -120,6 +120,14 @@ main section[id]::before{content:attr(data-block);position:absolute;right:clamp(
 main section[id]>.sect-head{padding-right:64px;margin-bottom:clamp(18px,2.5vw,32px);padding-bottom:clamp(16px,2vw,24px);border-bottom:1px solid var(--line)}
 main section[id]:nth-of-type(even){background:color-mix(in srgb,var(--card) 93%,var(--wash))}
 @media(max-width:650px){main section[id]{margin-block:22px!important;padding:20px!important;border-radius:16px}main section[id]::before{position:static;display:block;margin-bottom:12px}main section[id]>.sect-head{padding-right:0}}
+
+/* Indicadores compactos: uma linha em telas largas, grade responsiva em telas menores */
+#periodReport .period-summary-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;margin:0 0 22px}
+#periodReport .period-summary-grid .follower-stat{min-width:0;padding:12px 9px;border-radius:10px}
+#periodReport .period-summary-grid .follower-stat b{font-size:clamp(17px,1.65vw,24px);line-height:1.15;letter-spacing:-.035em;white-space:nowrap}
+#periodReport .period-summary-grid .follower-stat span{font-size:10px;line-height:1.3;overflow-wrap:anywhere}
+@media(max-width:1100px){#periodReport .period-summary-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:650px){#periodReport .period-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 <style>
 .ranking-chooser{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 17px}
@@ -559,7 +567,7 @@ function renderPeriodSummary(){
  if(!current.length){container.innerHTML='<p class="sub">Aguardando coletas consolidadas por período.</p>';return;}
  const totals=current.reduce((o,r)=>{o.posts+=r.posts_count;o.reels+=r.reels_count;o.carousels+=r.carousels_count;o.others+=r.other_formats_count;o.likes+=r.likes_total||0;o.comments+=r.comments_total||0;o.views+=r.reel_views_total||0;return o;},{posts:0,reels:0,carousels:0,others:0,likes:0,comments:0,views:0});
  const leaders=[...current].filter(x=>x.likes_total!==null).sort((a,b)=>b.likes_total/a.posts_count-a.likes_total/b.posts_count).slice(0,5);
- container.innerHTML='<div class="follower-stats" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px">'+[['Perfis',current.length],['Publicações',totals.posts],['Reels',totals.reels],['Carrosséis',totals.carousels],['Outros formatos',totals.others],['Curtidas visíveis',totals.likes],['Comentários visíveis',totals.comments],['Visualizações Reels*',totals.views]].map(([k,v])=>'<div class="follower-stat"><b>'+formatInt(v)+'</b><span>'+en(k)+'</span></div>').join('')+'</div><h4 style="margin:20px 0 8px">Média de curtidas por postagem (amostras coletadas)</h4><div class="mnotes">'+leaders.map(p=>{const a=accounts.find(x=>x.id===p.profile_id);return '<div class="line"><span>'+en(a?.handle||String(p.profile_id))+' · '+p.posts_count+' posts</span><b>'+formatInt(p.likes_total/p.posts_count)+'</b></div>'}).join('')+'</div><p class="smallprint">*Inclui números aproximados onde indicado. A TM1 tem interações ocultas e não integra o ranking de curtidas. Os 14 perfis têm amostras de tamanhos diferentes; o ranking é apenas descritivo, não comprova maior eficácia. Médias de views consideram Reels, não todas as publicações. Não há dados individuais para cálculo de mediana.</p>';
+ container.innerHTML='<div class="follower-stats period-summary-grid">'+[['Perfis',current.length],['Publicações',totals.posts],['Reels',totals.reels],['Carrosséis',totals.carousels],['Outros formatos',totals.others],['Curtidas visíveis',totals.likes],['Comentários visíveis',totals.comments],['Visualizações Reels*',totals.views]].map(([k,v])=>'<div class="follower-stat"><b>'+formatInt(v)+'</b><span>'+en(k)+'</span></div>').join('')+'</div><h4 style="margin:20px 0 8px">Média de curtidas por postagem (amostras coletadas)</h4><div class="mnotes">'+leaders.map(p=>{const a=accounts.find(x=>x.id===p.profile_id);return '<div class="line"><span>'+en(a?.handle||String(p.profile_id))+' · '+p.posts_count+' posts</span><b>'+formatInt(p.likes_total/p.posts_count)+'</b></div>'}).join('')+'</div><p class="smallprint">*Inclui números aproximados onde indicado. A TM1 tem interações ocultas e não integra o ranking de curtidas. Os 14 perfis têm amostras de tamanhos diferentes; o ranking é apenas descritivo, não comprova maior eficácia. Médias de views consideram Reels, não todas as publicações. Não há dados individuais para cálculo de mediana.</p>';
 }
 
 const EDIT_AXES=[['Notícias e repertório','axis_news'],['Educação e insights','axis_education'],['Cases e projetos','axis_cases'],['Comunidade e eventos','axis_community'],['Institucional e produto','axis_institutional']];
