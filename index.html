@@ -309,6 +309,40 @@ html[data-theme="light"] .command-actions a{color:#26384a!important;border-color
 html[data-theme="light"] .command-actions small{color:#586c7c!important}
 html[data-theme="light"] .command-metric:hover,html[data-theme="light"] .signal:hover{background:#fff3e7!important;border-color:#f47721!important}
 html[data-theme="light"] .command-actions a:hover{background:#fff3e7!important}
+</style><style>
+/* Tema claro global: superfícies off-white, hierarquia e contraste */
+:root[data-theme="light"]{
+ --paper:#f6f4ef;
+ --card:#fffdf9;
+ --wash:#ebe9e3;
+ --ink:#26313c;
+ --mute:#566473;
+ --line:#d9d8d1;
+ --accent:#b84e10;
+ --accent-soft:#fce8d7;
+ --warn:#945015;
+ --warn-soft:#fbecd9;
+ --good:#246c49;
+ --good-soft:#e3f1e7;
+ --shadow:0 14px 36px rgba(30,38,44,.075);
+ color-scheme:light;
+}
+:root[data-theme="light"] body{background:var(--paper);color:var(--ink)}
+:root[data-theme="light"] .nav-stick{background:var(--paper)}
+:root[data-theme="light"] .news-panel,
+:root[data-theme="light"] .card,
+:root[data-theme="light"] .kpi,
+:root[data-theme="light"] .news-card,
+:root[data-theme="light"] .editorial-result{color:var(--ink)}
+:root[data-theme="light"] .sub,
+:root[data-theme="light"] .lead,
+:root[data-theme="light"] .news-meta,
+:root[data-theme="light"] .news-footnote{color:var(--mute)}
+:root[data-theme="light"] input,
+:root[data-theme="light"] select,
+:root[data-theme="light"] textarea{color:var(--ink);background:var(--card);border-color:var(--line)}
+:root[data-theme="light"] input::placeholder,
+:root[data-theme="light"] textarea::placeholder{color:#6d7780}
 </style></head>
 <body>
 <div class="ndi-cloud-bar" id="ndiCloudBar" role="status">
